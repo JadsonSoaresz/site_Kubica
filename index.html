@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KUBICA — Impressão 3D sob encomenda</title>
+<meta name="description" content="KUBICA — impressão 3D sob encomenda e venda de produtos autorais. Do arquivo à peça final, camada por camada.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23000%22/><rect x=%2225%22 y=%2225%22 width=%2250%22 height=%2250%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%228%22/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="loader" id="loader">
+  <div class="loader-cube">
+    <span></span><span></span><span></span><span></span>
+  </div>
+  <div class="loader-text">KUBICA</div>
+</div>
+
+<div class="grain"></div>
+
+<header class="nav" id="nav">
+  <a href="#top" class="nav-logo">KUBICA<span>.</span></a>
+  <nav class="nav-links" id="navLinks">
+    <a href="#sobre">Sobre</a>
+    <a href="#servicos">Serviços</a>
+    <a href="#produtos">Produtos</a>
+    <a href="#processo">Processo</a>
+    <a href="#contato">Contato</a>
+  </nav>
+  <a href="#contato" class="nav-cta">Orçamento</a>
+  <button class="nav-toggle" id="navToggle" aria-label="Abrir menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-inner">
+      <p class="eyebrow reveal">Impressão 3D sob encomenda</p>
+      <h1 class="hero-title">
+        <span class="reveal-line"><span>DAMOS FORMA</span></span>
+        <span class="reveal-line"><span>ÀS SUAS IDEIAS,</span></span>
+        <span class="reveal-line"><span class="outline">CAMADA A CAMADA</span></span>
+      </h1>
+      <p class="hero-sub reveal">Do arquivo digital ao objeto físico. Impressão 3D por encomenda
+      e produtos autorais, com precisão e acabamento de estúdio.</p>
+      <div class="hero-actions reveal">
+        <a href="#contato" class="btn btn-solid">Solicitar orçamento</a>
+        <a href="#produtos" class="btn btn-ghost">Ver produtos</a>
+      </div>
+    </div>
+    <div class="scroll-cue">
+      <span>Role para explorar</span>
+      <div class="scroll-line"><i></i></div>
+    </div>
+  </section>
+
+  <!-- SOBRE -->
+  <section class="section sobre" id="sobre">
+    <div class="section-grid">
+      <div class="section-tag reveal-3d">
+        <span class="tag-num">01</span>
+        <span class="tag-label">Sobre a Kubica</span>
+      </div>
+      <div class="section-content">
+        <h2 class="reveal-3d">Precisão geométrica.<br>Acabamento de estúdio.</h2>
+        <p class="reveal-3d">A Kubica nasceu para transformar arquivos digitais em objetos reais.
+        Trabalhamos com impressão 3D sob encomenda para projetos, protótipos e peças técnicas,
+        e também desenvolvemos uma linha própria de produtos impressos — de peças decorativas
+        a utilitários do dia a dia.</p>
+        <div class="stats reveal-3d">
+          <div class="stat"><span class="stat-num" data-count="0.05">0</span><span class="stat-suf">mm</span><span class="stat-label">precisão de camada</span></div>
+          <div class="stat"><span class="stat-num" data-count="5">0</span><span class="stat-suf">+</span><span class="stat-label">materiais disponíveis</span></div>
+          <div class="stat"><span class="stat-num" data-count="24">0</span><span class="stat-suf">h</span><span class="stat-label">para orçamento</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVIÇOS -->
+  <section class="section servicos" id="servicos">
+    <div class="section-tag reveal-3d">
+      <span class="tag-num">02</span>
+      <span class="tag-label">Serviços</span>
+    </div>
+    <h2 class="section-title reveal-3d">O que fazemos</h2>
+
+    <div class="cards">
+      <article class="card reveal-3d">
+        <div class="card-icon">
+          <svg viewBox="0 0 48 48"><path d="M24 4 44 16v16L24 44 4 32V16z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M24 4v40M4 16l20 12 20-12" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <h3>Impressão sob encomenda</h3>
+        <p>Envie seu arquivo (STL, OBJ, STEP) e receba a peça impressa com precisão,
+        no material e acabamento ideais para o seu projeto.</p>
+      </article>
+
+      <article class="card reveal-3d">
+        <div class="card-icon">
+          <svg viewBox="0 0 48 48"><path d="M6 40 18 10h12l12 30" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M13 30h22" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <h3>Modelagem 3D</h3>
+        <p>Não tem o arquivo pronto? Nossa equipe modela sua ideia a partir de
+        desenhos, fotos ou referências, do zero.</p>
+      </article>
+
+      <article class="card reveal-3d">
+        <div class="card-icon">
+          <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M24 6v36M6 24h36" stroke="currentColor" stroke-width="1"/></svg>
+        </div>
+        <h3>Produtos autorais</h3>
+        <p>Peças decorativas, utilitárias e colecionáveis desenvolvidas e
+        impressas por nós — disponíveis para pronta-entrega.</p>
+      </article>
+    </div>
+
+    <div class="materials reveal-3d">
+      <span class="materials-label">Materiais</span>
+      <div class="material-chips">
+        <span>PLA</span><span>PETG</span><span>ABS</span><span>Resina</span><span>TPU Flexível</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUTOS -->
+  <section class="section produtos" id="produtos">
+    <div class="section-tag reveal-3d">
+      <span class="tag-num">03</span>
+      <span class="tag-label">Loja</span>
+    </div>
+    <h2 class="section-title reveal-3d">Produtos Kubica</h2>
+    <p class="section-desc reveal-3d">Uma seleção de peças autorais, prontas para entrega.
+    Exemplos de catálogo — fotos e valores reais entram aqui.</p>
+
+    <div class="products-grid">
+      <article class="product reveal-3d">
+        <div class="product-visual shape-cube"><div></div><div></div><div></div></div>
+        <h3>Vaso Facetado</h3>
+        <p class="product-price">R$ 89,90</p>
+        <button class="btn btn-line">Ver detalhes</button>
+      </article>
+
+      <article class="product reveal-3d">
+        <div class="product-visual shape-sphere"></div>
+        <h3>Luminária Orbe</h3>
+        <p class="product-price">R$ 149,90</p>
+        <button class="btn btn-line">Ver detalhes</button>
+      </article>
+
+      <article class="product reveal-3d">
+        <div class="product-visual shape-pyramid"></div>
+        <h3>Organizador Prisma</h3>
+        <p class="product-price">R$ 64,90</p>
+        <button class="btn btn-line">Ver detalhes</button>
+      </article>
+
+      <article class="product reveal-3d">
+        <div class="product-visual shape-hex"></div>
+        <h3>Porta-chaves Hex</h3>
+        <p class="product-price">R$ 29,90</p>
+        <button class="btn btn-line">Ver detalhes</button>
+      </article>
+
+      <article class="product reveal-3d">
+        <div class="product-visual shape-ring"></div>
+        <h3>Suporte de Anéis</h3>
+        <p class="product-price">R$ 39,90</p>
+        <button class="btn btn-line">Ver detalhes</button>
+      </article>
+
+      <article class="product reveal-3d">
+        <div class="product-visual shape-cube alt"><div></div><div></div><div></div></div>
+        <h3>Miniatura Geométrica</h3>
+        <p class="product-price">R$ 54,90</p>
+        <button class="btn btn-line">Ver detalhes</button>
+      </article>
+    </div>
+
+    <div class="products-cta reveal-3d">
+      <a href="#contato" class="btn btn-solid">Quero encomendar uma peça</a>
+    </div>
+  </section>
+
+  <!-- PROCESSO -->
+  <section class="section processo" id="processo">
+    <div class="section-tag reveal-3d">
+      <span class="tag-num">04</span>
+      <span class="tag-label">Como funciona</span>
+    </div>
+    <h2 class="section-title reveal-3d">Do arquivo à peça</h2>
+
+    <div class="timeline">
+      <div class="timeline-line"><i id="timelineFill"></i></div>
+
+      <div class="step reveal-3d">
+        <span class="step-num">01</span>
+        <h3>Envie seu modelo</h3>
+        <p>Mande o arquivo 3D ou apenas uma referência da ideia — foto, desenho ou descrição.</p>
+      </div>
+      <div class="step reveal-3d">
+        <span class="step-num">02</span>
+        <h3>Orçamento</h3>
+        <p>Retorno em até 24h com valor, material recomendado e prazo de produção.</p>
+      </div>
+      <div class="step reveal-3d">
+        <span class="step-num">03</span>
+        <h3>Impressão</h3>
+        <p>Produção camada a camada, com acompanhamento e controle de qualidade.</p>
+      </div>
+      <div class="step reveal-3d">
+        <span class="step-num">04</span>
+        <h3>Acabamento &amp; entrega</h3>
+        <p>Pós-processamento, embalagem cuidadosa e envio para todo o Brasil.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section class="section contato" id="contato">
+    <div class="contato-grid">
+      <div class="contato-info reveal-3d">
+        <span class="section-tag" style="padding:0;margin-bottom:24px;">
+          <span class="tag-num">05</span><span class="tag-label">Contato</span>
+        </span>
+        <h2>Vamos criar<br>seu próximo objeto?</h2>
+        <p>Conte um pouco sobre seu projeto e retornamos com um orçamento.
+        Se preferir, fale direto com a gente pelo WhatsApp.</p>
+        <a href="https://wa.me/5500000000000" target="_blank" rel="noopener" class="btn btn-solid whatsapp-btn">
+          Falar no WhatsApp
+        </a>
+        <ul class="contact-details">
+          <li><span>E-mail</span>contato@kubica3d.com.br</li>
+          <li><span>Instagram</span>@kubica3d</li>
+          <li><span>Atendimento</span>Seg–Sex, 9h às 18h</li>
+        </ul>
+      </div>
+
+      <form class="contato-form reveal-3d" id="contactForm">
+        <div class="form-row">
+          <label>Nome
+            <input type="text" name="nome" required placeholder="Seu nome">
+          </label>
+          <label>E-mail
+            <input type="email" name="email" required placeholder="voce@email.com">
+          </label>
+        </div>
+        <label>Telefone / WhatsApp
+          <input type="tel" name="telefone" placeholder="(00) 00000-0000">
+        </label>
+        <label>Conte sobre o projeto
+          <textarea name="mensagem" rows="4" required placeholder="Material, tamanho, referência do arquivo..."></textarea>
+        </label>
+        <button type="submit" class="btn btn-solid form-submit">Enviar mensagem</button>
+        <p class="form-note" id="formNote"></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-top">
+    <a href="#top" class="nav-logo">KUBICA<span>.</span></a>
+    <nav class="footer-links">
+      <a href="#sobre">Sobre</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#produtos">Produtos</a>
+      <a href="#processo">Processo</a>
+      <a href="#contato">Contato</a>
+    </nav>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 Kubica. Todos os direitos reservados.</p>
+    <p>Impressão 3D sob encomenda &amp; produtos autorais.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script type="module" src="js/three-scene.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
