@@ -1,4 +1,5 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+import * as THREE from "three";
+import { STLLoader } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/STLLoader.js";
 
 const canvas = document.getElementById("heroCanvas");
 const hero = document.getElementById("hero");
@@ -16,6 +17,7 @@ function initScene(canvas, hero) {
     canvas.style.display = "none";
     return;
   }
+  renderer.localClippingEnabled = true;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, hero.clientWidth / hero.clientHeight, 0.1, 100);
@@ -35,47 +37,93 @@ function initScene(canvas, hero) {
   rim.position.set(-6, -3, -6);
   scene.add(ambient, key, rim);
 
-  // ---- voxel cube: 4x4x4 grid, "printed" layer by layer ----
-  const GRID = 4;
-  const GAP = 0.06;
-  const SIZE = 1;
-  const cell = SIZE + GAP;
-  const offset = ((GRID - 1) * cell) / 2;
-
+  // ---- Kubica "K" logo, loaded from STL ----
   const group = new THREE.Group();
-  const boxGeo = new THREE.BoxGeometry(SIZE, SIZE, SIZE);
-  const edgesGeo = new THREE.EdgesGeometry(boxGeo);
-
-  const voxels = [];
-
-  for (let x = 0; x < GRID; x++) {
-    for (let y = 0; y < GRID; y++) {
-      for (let z = 0; z < GRID; z++) {
-        const mat = new THREE.MeshStandardMaterial({
-          color: 0x0c0c0c,
-          roughness: 0.55,
-          metalness: 0.1,
-        });
-        const mesh = new THREE.Mesh(boxGeo, mat);
-        const edges = new THREE.LineSegments(
-          edgesGeo,
-          new THREE.LineBasicMaterial({ color: 0xf4f4f2, transparent: true, opacity: isMobile() ? 0.32 : 0.55 })
-        );
-        mesh.add(edges);
-
-        mesh.position.set(x * cell - offset, y * cell - offset, z * cell - offset);
-        mesh.scale.setScalar(0);
-        group.add(mesh);
-        voxels.push({ mesh, layer: y });
-      }
-    }
-  }
-
-  group.rotation.set(-0.35, 0.65, 0);
+  group.rotation.set(-0.1, 0.3, 0);
+  group.scale.setScalar(isMobile() ? 0.8 : 1);
   if (isMobile()) {
     group.position.set(0.4, -1.6, 0);
   }
   scene.add(group);
+
+  const logoPivot = new THREE.Group();
+  group.add(logoPivot);
+
+  let buildComplete = false;
+  let buildPlane = null;
+
+  const loader = new STLLoader();
+  loader.load(
+    "assets/kubica-k.stl",
+    (geometry) => {
+      geometry.computeBoundingBox();
+      const size = new THREE.Vector3();
+      geometry.boundingBox.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const scaleFactor = 5.2 / maxDim;
+
+      geometry.center();
+      geometry.scale(scaleFactor, scaleFactor, scaleFactor);
+      geometry.computeVertexNormals();
+
+      const solidMat = new THREE.MeshStandardMaterial({
+        color: 0x0c0c0c,
+        roughness: 0.5,
+        metalness: 0.15,
+      });
+      const lineMat = new THREE.LineBasicMaterial({
+        color: 0xf4f4f2,
+        transparent: true,
+        opacity: isMobile() ? 0.45 : 0.8,
+      });
+
+      const mesh = new THREE.Mesh(geometry, solidMat);
+      const wireframe = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 15), lineMat);
+      mesh.add(wireframe);
+      logoPivot.add(mesh);
+
+      // ---- build-in animation: reveal bottom-to-top, like a print job ----
+      group.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(group);
+      buildPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), box.min.y);
+      solidMat.clippingPlanes = [buildPlane];
+      lineMat.clippingPlanes = [buildPlane];
+
+      const gsap = window.gsap;
+      if (gsap) {
+        gsap.to(buildPlane, {
+          constant: box.max.y,
+          duration: 1.4,
+          delay: 0.3,
+          ease: "power2.inOut",
+          onComplete: () => {
+            solidMat.clippingPlanes = [];
+            lineMat.clippingPlanes = [];
+            buildComplete = true;
+          },
+        });
+      } else {
+        buildPlane.constant = box.max.y;
+        solidMat.clippingPlanes = [];
+        lineMat.clippingPlanes = [];
+        buildComplete = true;
+      }
+    },
+    undefined,
+    (err) => {
+      console.warn("Kubica: falha ao carregar o logo STL, usando placeholder.", err);
+      const fallbackGeo = new THREE.BoxGeometry(4, 4, 4);
+      const fallbackMat = new THREE.MeshStandardMaterial({ color: 0x0c0c0c, roughness: 0.55 });
+      const fallbackMesh = new THREE.Mesh(fallbackGeo, fallbackMat);
+      const fallbackEdges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(fallbackGeo),
+        new THREE.LineBasicMaterial({ color: 0xf4f4f2, transparent: true, opacity: 0.6 })
+      );
+      fallbackMesh.add(fallbackEdges);
+      logoPivot.add(fallbackMesh);
+      buildComplete = true;
+    }
+  );
 
   // particles
   const particleCount = 140;
@@ -90,33 +138,6 @@ function initScene(canvas, hero) {
   const particleMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.03, transparent: true, opacity: 0.35 });
   const particles = new THREE.Points(particleGeo, particleMat);
   scene.add(particles);
-
-  // ---- build-in animation (print layer by layer) ----
-  const gsapReady = () => window.gsap;
-
-  function playBuildAnimation() {
-    if (!gsapReady()) {
-      voxels.forEach((v) => v.mesh.scale.setScalar(1));
-      return;
-    }
-    const tl = window.gsap.timeline({ delay: 0.3 });
-    for (let layer = 0; layer < GRID; layer++) {
-      const layerVoxels = voxels.filter((v) => v.layer === layer).map((v) => v.mesh.scale);
-      tl.to(
-        layerVoxels,
-        {
-          x: 1,
-          y: 1,
-          z: 1,
-          duration: 0.5,
-          ease: "back.out(2)",
-          stagger: 0.03,
-        },
-        layer * 0.22
-      );
-    }
-  }
-  playBuildAnimation();
 
   // ---- pointer parallax ----
   const pointer = { x: 0, y: 0 };
@@ -158,12 +179,14 @@ function initScene(canvas, hero) {
     requestAnimationFrame(animate);
     const dt = clock.getDelta();
 
-    const autoRotate = clock.elapsedTime * 0.12;
-    targetRotY = 0.65 + autoRotate + scrollProgress * 2.4 + pointer.x * 0.25;
-    targetRotX = -0.35 + pointer.y * -0.15 + scrollProgress * 0.6;
+    if (buildComplete) {
+      const autoRotate = clock.elapsedTime * 0.1;
+      targetRotY = 0.3 + autoRotate + scrollProgress * 2.4 + pointer.x * 0.2;
+      targetRotX = -0.1 + pointer.y * -0.12 + scrollProgress * 0.6;
 
-    group.rotation.y += (targetRotY - group.rotation.y) * Math.min(dt * 3, 1);
-    group.rotation.x += (targetRotX - group.rotation.x) * Math.min(dt * 3, 1);
+      group.rotation.y += (targetRotY - group.rotation.y) * Math.min(dt * 3, 1);
+      group.rotation.x += (targetRotX - group.rotation.x) * Math.min(dt * 3, 1);
+    }
 
     group.position.y = baseGroupY - scrollProgress * 1.4;
     const scale = (isMobile() ? 0.8 : 1) * (1 - scrollProgress * 0.25);
