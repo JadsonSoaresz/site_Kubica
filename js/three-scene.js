@@ -61,9 +61,10 @@ function initScene(canvas, hero) {
       geometry.boundingBox.getSize(size);
       const maxDim = Math.max(size.x, size.y, size.z) || 1;
       const scaleFactor = 5.2 / maxDim;
+      const THICKNESS = 0.45; // slims down the depth (Z) so the logo reads thinner edge-on
 
       geometry.center();
-      geometry.scale(scaleFactor, scaleFactor, scaleFactor);
+      geometry.scale(scaleFactor, scaleFactor, scaleFactor * THICKNESS);
       geometry.computeVertexNormals();
 
       const solidMat = new THREE.MeshStandardMaterial({
@@ -180,7 +181,7 @@ function initScene(canvas, hero) {
     const dt = clock.getDelta();
 
     if (buildComplete) {
-      const autoRotate = clock.elapsedTime * 0.1;
+      const autoRotate = clock.elapsedTime * 0.18;
       targetRotY = 0.3 + autoRotate + scrollProgress * 2.4 + pointer.x * 0.2;
       targetRotX = -0.1 + pointer.y * -0.12 + scrollProgress * 0.6;
 
