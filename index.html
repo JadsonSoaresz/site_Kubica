@@ -162,9 +162,12 @@
       </article>
 
       <article class="product reveal-3d">
-        <div class="product-visual shape-hex"></div>
-        <h3>Porta-chaves Hex</h3>
-        <p class="product-price">R$ 29,90</p>
+        <div class="product-visual product-viewer" data-product-viewer data-model="assets/chaveiro-cavalo.glb">
+          <canvas></canvas>
+          <span class="viewer-hint">Arraste para girar</span>
+        </div>
+        <h3>Chaveiro Cavalo</h3>
+        <p class="product-price">R$ 34,90</p>
         <button class="btn btn-line">Ver detalhes</button>
       </article>
 
@@ -292,6 +295,7 @@
 }
 </script>
 <script type="module" src="js/three-scene.js"></script>
+<script type="module" src="js/product-viewer.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

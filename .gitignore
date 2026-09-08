@@ -1,3 +1,6 @@
 node_modules/
 .DS_Store
 Thumbs.db
+
+# arquivos-fonte pesados (não usados pelo site em produção, só o .glb otimizado é usado)
+assets/*.3mf

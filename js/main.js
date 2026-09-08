@@ -164,7 +164,7 @@
   }
 
   function initTilt() {
-    const cards = document.querySelectorAll(".product-visual, .card");
+    const cards = document.querySelectorAll(".product-visual:not(.product-viewer), .card");
     cards.forEach((card) => {
       card.style.transformStyle = "preserve-3d";
       card.addEventListener("mousemove", (e) => {
