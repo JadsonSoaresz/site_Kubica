@@ -55,7 +55,7 @@ function createProductViewer(container) {
       geometry.scale(2.6 / maxDim, 2.6 / maxDim, 2.6 / maxDim);
 
       mesh.material = new THREE.MeshStandardMaterial({
-        color: 0x141414,
+        color: 0x7c4b00,
         roughness: 0.55,
         metalness: 0.08,
       });
