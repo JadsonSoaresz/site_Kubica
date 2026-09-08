@@ -2,10 +2,35 @@ import * as THREE from "three";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
+function loadPart(loader, url) {
+  return new Promise((resolve, reject) => {
+    loader.load(
+      url,
+      (gltf) => {
+        const mesh = gltf.scene.getObjectByProperty("type", "Mesh");
+        if (!mesh) return reject(new Error("no mesh in " + url));
+        if (!mesh.geometry.attributes.normal) mesh.geometry.computeVertexNormals();
+        resolve(mesh);
+      },
+      undefined,
+      reject
+    );
+  });
+}
+
 function createProductViewer(container) {
   const canvas = container.querySelector("canvas");
-  const modelUrl = container.dataset.model;
-  if (!canvas || !modelUrl) return;
+  const modelAttr = container.dataset.model;
+  if (!canvas || !modelAttr) return;
+
+  let urls;
+  try {
+    const parsed = JSON.parse(modelAttr);
+    urls = Array.isArray(parsed) ? parsed : [modelAttr];
+  } catch (e) {
+    urls = [modelAttr];
+  }
+  const singleColor = container.dataset.color ? "#" + container.dataset.color : null;
 
   let renderer;
   try {
@@ -40,35 +65,38 @@ function createProductViewer(container) {
   });
 
   const loader = new GLTFLoader();
-  loader.load(
-    modelUrl,
-    (gltf) => {
-      const mesh = gltf.scene.getObjectByProperty("type", "Mesh");
-      if (!mesh) return;
-      const geometry = mesh.geometry;
-      if (!geometry.attributes.normal) geometry.computeVertexNormals();
-      geometry.computeBoundingBox();
-      const size = new THREE.Vector3();
-      geometry.boundingBox.getSize(size);
-      const maxDim = Math.max(size.x, size.y, size.z) || 1;
-      geometry.center();
-      geometry.scale(2.6 / maxDim, 2.6 / maxDim, 2.6 / maxDim);
-
-      mesh.material = new THREE.MeshStandardMaterial({
-        color: 0x7c4b00,
-        roughness: 0.55,
-        metalness: 0.08,
+  Promise.all(urls.map((url) => loadPart(loader, url)))
+    .then((meshes) => {
+      const box = new THREE.Box3();
+      meshes.forEach((mesh) => {
+        mesh.geometry.computeBoundingBox();
+        box.union(mesh.geometry.boundingBox);
       });
-      mesh.rotation.x = -0.15;
-      scene.add(mesh);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const scale = 2.6 / maxDim;
+
+      const group = new THREE.Group();
+      meshes.forEach((mesh) => {
+        mesh.geometry.translate(-center.x, -center.y, -center.z);
+        mesh.geometry.scale(scale, scale, scale);
+        const baseColor = singleColor ? new THREE.Color(singleColor) : mesh.material.color;
+        mesh.material = new THREE.MeshStandardMaterial({
+          color: baseColor,
+          roughness: 0.55,
+          metalness: 0.08,
+        });
+        group.add(mesh);
+      });
+      group.rotation.x = -0.15;
+      scene.add(group);
       container.classList.add("loaded");
-    },
-    undefined,
-    (err) => {
-      console.warn("Kubica: falha ao carregar o chaveiro 3D.", err);
+    })
+    .catch((err) => {
+      console.warn("Kubica: falha ao carregar modelo 3D do produto.", err);
       container.classList.add("load-error");
-    }
-  );
+    });
 
   function resize() {
     const w = container.clientWidth;
