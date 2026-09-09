@@ -71,6 +71,7 @@ function initScene(canvas, hero) {
         color: 0x0c0c0c,
         roughness: 0.5,
         metalness: 0.15,
+        side: THREE.DoubleSide,
       });
       const lineMat = new THREE.LineBasicMaterial({
         color: 0xf4f4f2,
@@ -163,13 +164,14 @@ function initScene(canvas, hero) {
     const w = hero.clientWidth;
     const h = hero.clientHeight;
     camera.aspect = w / h;
-    camera.position.z = isMobile() ? 16.5 : 11;
+    baseCameraZ = isMobile() ? 16.5 : 11;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
     group.position.x = isMobile() ? 0.4 : 0;
     baseGroupY = isMobile() ? -1.6 : 0;
   }
   let baseGroupY = isMobile() ? -1.6 : 0;
+  let baseCameraZ = isMobile() ? 16.5 : 11;
   window.addEventListener("resize", onResize);
 
   const clock = new THREE.Clock();
@@ -189,13 +191,23 @@ function initScene(canvas, hero) {
       group.rotation.x += (targetRotX - group.rotation.x) * Math.min(dt * 3, 1);
     }
 
-    group.position.y = baseGroupY - scrollProgress * 1.4;
-    const scale = (isMobile() ? 0.8 : 1) * (1 - scrollProgress * 0.25);
-    group.scale.setScalar(scale);
+    group.position.y = baseGroupY;
+    group.scale.setScalar(isMobile() ? 0.8 : 1);
+
+    // dolly the camera through the middle of the logo as the hero scrolls away
+    const dollyRange = isMobile() ? 20 : 16;
+    const dollyEase = scrollProgress * scrollProgress;
+    const targetZ = baseCameraZ - dollyEase * dollyRange;
+    camera.position.z += (targetZ - camera.position.z) * Math.min(dt * 4, 1);
 
     camera.position.x += (pointer.x * 0.6 - camera.position.x) * 0.04;
     camera.position.y += (-pointer.y * 0.4 - camera.position.y) * 0.04;
     camera.lookAt(0, 0, 0);
+
+    const fadeStart = 0.55;
+    const fadeEnd = 0.95;
+    const fade = 1 - Math.min(Math.max((scrollProgress - fadeStart) / (fadeEnd - fadeStart), 0), 1);
+    canvas.style.opacity = fade;
 
     particles.rotation.y += dt * 0.015;
 
