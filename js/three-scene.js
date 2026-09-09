@@ -203,6 +203,9 @@ function initScene(canvas, hero) {
   const clock = new THREE.Clock();
   let targetRotX = group.rotation.x;
   let targetRotY = group.rotation.y;
+  let idleTime = 0;
+  let capturedRotY = group.rotation.y;
+  let capturedRotX = group.rotation.x;
 
   function animate() {
     requestAnimationFrame(animate);
@@ -210,17 +213,23 @@ function initScene(canvas, hero) {
 
     // phase 1 (0 -> 0.22): straighten + center the logo, fading out mouse parallax
     const alignT = Math.min(scrollProgress / 0.22, 1);
-    const pointerT = 1 - alignT;
+    const isIdle = scrollProgress < 0.001;
+    const neutralRotY = 0.3;
+    const neutralRotX = -0.1;
 
     if (buildComplete) {
-      const autoRotate = clock.elapsedTime * 0.18 * pointerT;
-      const idleRotY = 0.3 + autoRotate + pointer.x * 0.2 * pointerT;
-      const idleRotX = -0.1 + pointer.y * -0.12 * pointerT;
-      const neutralRotY = 0.3;
-      const neutralRotX = -0.1;
-
-      targetRotY = idleRotY + (neutralRotY - idleRotY) * alignT;
-      targetRotX = idleRotX + (neutralRotX - idleRotX) * alignT;
+      if (isIdle) {
+        // only accumulate auto-rotation while idle, so it never jumps when the
+        // sequence starts/stops regardless of how long the page has been open
+        idleTime += dt;
+        targetRotY = neutralRotY + idleTime * 0.18 + pointer.x * 0.2;
+        targetRotX = neutralRotX + pointer.y * -0.12;
+        capturedRotY = targetRotY;
+        capturedRotX = targetRotX;
+      } else {
+        targetRotY = capturedRotY + (neutralRotY - capturedRotY) * alignT;
+        targetRotX = capturedRotX + (neutralRotX - capturedRotX) * alignT;
+      }
 
       group.rotation.y += (targetRotY - group.rotation.y) * Math.min(dt * 3, 1);
       group.rotation.x += (targetRotX - group.rotation.x) * Math.min(dt * 3, 1);
@@ -236,8 +245,9 @@ function initScene(canvas, hero) {
     const targetZ = baseCameraZ - dollyEase * dollyRange;
     camera.position.z += (targetZ - camera.position.z) * Math.min(dt * 4, 1);
 
-    camera.position.x += (pointer.x * 0.6 * pointerT - camera.position.x) * 0.04;
-    camera.position.y += (-pointer.y * 0.4 * pointerT - camera.position.y) * 0.04;
+    const camPointerT = 1 - alignT;
+    camera.position.x += (pointer.x * 0.6 * camPointerT - camera.position.x) * 0.04;
+    camera.position.y += (-pointer.y * 0.4 * camPointerT - camera.position.y) * 0.04;
     camera.lookAt(0, 0, 0);
 
     // phase 3 (0.78 -> 1): fade out completely so the logo's edges are gone before Sobre unlocks
