@@ -148,16 +148,42 @@ function initScene(canvas, hero) {
     pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
   });
 
-  // ---- scroll-driven rotation / fade ----
+  // ---- pinned scroll sequence: align to center -> zoom through -> fade out ----
   let scrollProgress = 0;
-  function updateScrollProgress() {
-    const rect = hero.getBoundingClientRect();
-    const total = rect.height;
-    const passed = Math.min(Math.max(-rect.top, 0), total);
-    scrollProgress = total > 0 ? passed / total : 0;
+  const heroInner = document.querySelector(".hero-inner");
+  const scrollCue = document.querySelector(".scroll-cue");
+  const gsapLib = window.gsap;
+  const ScrollTrigger = window.ScrollTrigger;
+
+  if (gsapLib && ScrollTrigger) {
+    gsapLib.registerPlugin(ScrollTrigger);
+    ScrollTrigger.create({
+      trigger: hero,
+      start: "top top",
+      end: () => (isMobile() ? "+=90%" : "+=130%"),
+      pin: true,
+      scrub: 0.4,
+      onUpdate: (self) => {
+        scrollProgress = self.progress;
+        const textT = Math.min(scrollProgress / 0.22, 1);
+        if (heroInner) {
+          heroInner.style.opacity = 1 - textT;
+          heroInner.style.transform = `translateY(${-textT * 26}px)`;
+        }
+        if (scrollCue) scrollCue.style.opacity = 1 - textT;
+      },
+    });
+  } else {
+    // fallback without GSAP: simple rect-based progress, no pin
+    function updateScrollProgress() {
+      const rect = hero.getBoundingClientRect();
+      const total = rect.height;
+      const passed = Math.min(Math.max(-rect.top, 0), total);
+      scrollProgress = total > 0 ? passed / total : 0;
+    }
+    window.addEventListener("scroll", updateScrollProgress, { passive: true });
+    updateScrollProgress();
   }
-  window.addEventListener("scroll", updateScrollProgress, { passive: true });
-  updateScrollProgress();
 
   // ---- resize ----
   function onResize() {
@@ -182,10 +208,19 @@ function initScene(canvas, hero) {
     requestAnimationFrame(animate);
     const dt = clock.getDelta();
 
+    // phase 1 (0 -> 0.22): straighten + center the logo, fading out mouse parallax
+    const alignT = Math.min(scrollProgress / 0.22, 1);
+    const pointerT = 1 - alignT;
+
     if (buildComplete) {
-      const autoRotate = clock.elapsedTime * 0.18;
-      targetRotY = 0.3 + autoRotate + scrollProgress * 2.4 + pointer.x * 0.2;
-      targetRotX = -0.1 + pointer.y * -0.12 + scrollProgress * 0.6;
+      const autoRotate = clock.elapsedTime * 0.18 * pointerT;
+      const idleRotY = 0.3 + autoRotate + pointer.x * 0.2 * pointerT;
+      const idleRotX = -0.1 + pointer.y * -0.12 * pointerT;
+      const neutralRotY = 0.3;
+      const neutralRotX = -0.1;
+
+      targetRotY = idleRotY + (neutralRotY - idleRotY) * alignT;
+      targetRotX = idleRotX + (neutralRotX - idleRotX) * alignT;
 
       group.rotation.y += (targetRotY - group.rotation.y) * Math.min(dt * 3, 1);
       group.rotation.x += (targetRotX - group.rotation.x) * Math.min(dt * 3, 1);
@@ -194,22 +229,25 @@ function initScene(canvas, hero) {
     group.position.y = baseGroupY;
     group.scale.setScalar(isMobile() ? 0.8 : 1);
 
-    // dolly the camera through the middle of the logo as the hero scrolls away
+    // phase 2 (0.2 -> 0.85): dolly the camera through the middle of the logo
     const dollyRange = isMobile() ? 20 : 16;
-    const dollyEase = scrollProgress * scrollProgress;
+    const dollyT = Math.min(Math.max((scrollProgress - 0.2) / 0.65, 0), 1);
+    const dollyEase = dollyT * dollyT;
     const targetZ = baseCameraZ - dollyEase * dollyRange;
     camera.position.z += (targetZ - camera.position.z) * Math.min(dt * 4, 1);
 
-    camera.position.x += (pointer.x * 0.6 - camera.position.x) * 0.04;
-    camera.position.y += (-pointer.y * 0.4 - camera.position.y) * 0.04;
+    camera.position.x += (pointer.x * 0.6 * pointerT - camera.position.x) * 0.04;
+    camera.position.y += (-pointer.y * 0.4 * pointerT - camera.position.y) * 0.04;
     camera.lookAt(0, 0, 0);
 
-    const fadeStart = 0.55;
-    const fadeEnd = 0.95;
+    // phase 3 (0.78 -> 1): fade out completely so the logo's edges are gone before Sobre unlocks
+    const fadeStart = 0.78;
+    const fadeEnd = 1;
     const fade = 1 - Math.min(Math.max((scrollProgress - fadeStart) / (fadeEnd - fadeStart), 0), 1);
     canvas.style.opacity = fade;
 
     particles.rotation.y += dt * 0.015;
+    particles.material.opacity = 0.35 * fade;
 
     renderer.setClearColor(0x000000, 0);
     renderer.render(scene, camera);
